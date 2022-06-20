@@ -5,12 +5,142 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quran</title>
+    <title>Adzan & Al-Qur'an</title>
     <link rel="stylesheet" href="stylesheet.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+        rel="stylesheet">
 </head>
 
 <body>
+    <div class="date-wrapper">
+        <div class="container">
+            <h2 id="date-today"></h2>
+        </div>
+    </div>
+    <div class="adzan-wrapper">
+        <div class="container">
+            <h4 id="city" class="city"></h4>
+            <div class="adzan-list">
+                <div class="adzan-item subuh">
+                    <h4>Subuh</h4>
+                    <h1 id="subuh">00.00</h1>
+                </div>
+                <div class="adzan-item dzuhur">
+                    <h4>Dzuhur</h4>
+                    <h1 id="dzuhur">00.00</h1>
+                </div>
+                <div class="adzan-item ashar">
+                    <h4>Ashar</h4>
+                    <h1 id="ashar">00.00</h1>
+                </div>
+                <div class="adzan-item maghrib">
+                    <h4>Maghrib</h4>
+                    <h1 id="maghrib">00.00</h1>
+                </div>
+                <div class="adzan-item isya">
+                    <h4>Isya</h4>
+                    <h1 id="isya">00.00</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="quran-wrapper">
+        <div class="container">
+            <h2>Al Qur'an</h2>
+            <div class="quran-list" id="quran-list">
+            </div>
+        </div>
+    </div>
 
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p>Some text in the Modal</p>
+        </div>
+
+    </div>
+
+    <script>
+        var date = new Date();
+        var tahun = date.getFullYear();
+        var bulan = date.getMonth();
+        var tanggal = date.getDate();
+        var hari = date.getDay();
+
+        fetch("https://api.myquran.com/v1/sholat/jadwal/2308/" + tahun + "/" + bulan + "/" + tanggal)
+            .then(response => response.json())
+            .then(data => {
+                var item = data.data;
+                var dataKota = item.lokasi + ", " + item.daerah + ", Indonesia";
+                document.getElementById("city").innerHTML = dataKota.toLowerCase();
+                var jadwal = item.jadwal;
+                document.getElementById("subuh").innerHTML = jadwal.subuh;
+                document.getElementById("dzuhur").innerHTML = jadwal.dzuhur;
+                document.getElementById("ashar").innerHTML = jadwal.ashar;
+                document.getElementById("maghrib").innerHTML = jadwal.maghrib;
+                document.getElementById("isya").innerHTML = jadwal.isya;
+            }).catch(e => {
+                console.log("Error Fetch Adzan: " + e);
+            })
+
+        switch (hari) {
+            case 0: hari = "Minggu"; break;
+            case 1: hari = "Senin"; break;
+            case 2: hari = "Selasa"; break;
+            case 3: hari = "Rabu"; break;
+            case 4: hari = "Kamis"; break;
+            case 5: hari = "Jum'at"; break;
+            case 6: hari = "Sabtu"; break;
+        }
+        switch (bulan) {
+            case 0: bulan = "Januari"; break;
+            case 1: bulan = "Februari"; break;
+            case 2: bulan = "Maret"; break;
+            case 3: bulan = "April"; break;
+            case 4: bulan = "Mei"; break;
+            case 5: bulan = "Juni"; break;
+            case 6: bulan = "Juli"; break;
+            case 7: bulan = "Agustus"; break;
+            case 8: bulan = "September"; break;
+            case 9: bulan = "Oktober"; break;
+            case 10: bulan = "November"; break;
+            case 11: bulan = "Desember"; break;
+        }
+        var tampilTanggal = hari + ", " + tanggal + " " + bulan + " " + tahun;
+        document.getElementById("date-today").innerHTML = tampilTanggal;
+
+        var modal = document.getElementById("myModal");
+        var btn = document.getElementById("city");
+        var span = document.getElementsByClassName("close")[0];
+        btn.onclick = function () {
+            modal.style.display = "block";
+        }
+        span.onclick = function () {
+            modal.style.display = "none";
+        }
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        fetch("https://al-quran-8d642.firebaseio.com/data.json?print=pretty")
+            .then(response => response.json())
+            .then(data => {
+                var item = "";
+                for (var i = 0; i < data.length; i++) {
+                    item += `<div class="quran-surah">
+                    <h4 class="surah-number">`+ data[i].nomor + `</h4>
+                    <h5 class="surah-name">`+ data[i].nama + `</h5>
+                    <h5 class="surah-define">`+ data[i].arti + `</h5>
+                </div>`;
+                }
+                document.getElementById("quran-list").innerHTML = item;
+            }).catch(e => {
+                console.log("Error Fetch Quran: " + e);
+            })
+    </script>
 </body>
 
 </html>
