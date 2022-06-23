@@ -53,12 +53,19 @@
         </div>
     </div>
 
-    <div id="myModal" class="modal">
+    <div id="modal-city" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
-            <p>Some text in the Modal</p>
+            <span class="close" id="close-city">&times;</span>
+            <label for="city-form">Pilih Kota/Kabupaten:</label>
+            <select name="city-form" id="city-form">
+            </select>
         </div>
+    </div>
 
+    <div id="modal-surah" class="modal">
+        <div class="modal-content">
+            <span class="close" id="close-surah">&times;</span>
+        </div>
     </div>
 
     <script>
@@ -67,22 +74,38 @@
         var bulan = date.getMonth();
         var tanggal = date.getDate();
         var hari = date.getDay();
+        var newBulan = null;
 
-        fetch("https://api.myquran.com/v1/sholat/jadwal/2308/" + tahun + "/" + bulan + "/" + tanggal)
-            .then(response => response.json())
-            .then(data => {
-                var item = data.data;
-                var dataKota = item.lokasi + ", " + item.daerah + ", Indonesia";
-                document.getElementById("city").innerHTML = dataKota.toLowerCase();
-                var jadwal = item.jadwal;
-                document.getElementById("subuh").innerHTML = jadwal.subuh;
-                document.getElementById("dzuhur").innerHTML = jadwal.dzuhur;
-                document.getElementById("ashar").innerHTML = jadwal.ashar;
-                document.getElementById("maghrib").innerHTML = jadwal.maghrib;
-                document.getElementById("isya").innerHTML = jadwal.isya;
-            }).catch(e => {
-                console.log("Error Fetch Adzan: " + e);
-            })
+        getAdzan();
+        function getAdzan(idCity) {
+            if (idCity == null) {
+                getAdzan(1301);
+            }
+            fetch("https://api.myquran.com/v1/sholat/jadwal/" + idCity + "/" + tahun + "/" + bulan + "/" + tanggal)
+                .then(response => response.json())
+                .then(data => {
+                    var item = data.data;
+                    if (item.lokasi != null) {
+                        var dataKota = item.lokasi + ", " + item.daerah + ", Indonesia";
+                    }
+                    document.getElementById("city").innerHTML = dataKota.toLowerCase();
+                    var jadwal = item.jadwal;
+                    document.getElementById("subuh").innerHTML = jadwal.subuh;
+                    document.getElementById("dzuhur").innerHTML = jadwal.dzuhur;
+                    document.getElementById("ashar").innerHTML = jadwal.ashar;
+                    document.getElementById("maghrib").innerHTML = jadwal.maghrib;
+                    document.getElementById("isya").innerHTML = jadwal.isya;
+                }).catch(e => {
+                    console.log("Error Fetch Adzan: " + e);
+                })
+        }
+
+        var cityForm = document.getElementById("city-form");
+        cityForm.addEventListener("change", updateValue);
+        function updateValue() {
+            console.log(cityForm.value);
+            getAdzan(cityForm.value);
+        }
 
         switch (hari) {
             case 0: hari = "Minggu"; break;
@@ -94,34 +117,48 @@
             case 6: hari = "Sabtu"; break;
         }
         switch (bulan) {
-            case 0: bulan = "Januari"; break;
-            case 1: bulan = "Februari"; break;
-            case 2: bulan = "Maret"; break;
-            case 3: bulan = "April"; break;
-            case 4: bulan = "Mei"; break;
-            case 5: bulan = "Juni"; break;
-            case 6: bulan = "Juli"; break;
-            case 7: bulan = "Agustus"; break;
-            case 8: bulan = "September"; break;
-            case 9: bulan = "Oktober"; break;
-            case 10: bulan = "November"; break;
-            case 11: bulan = "Desember"; break;
+            case 0: newBulan = "Januari"; break;
+            case 1: newBulan = "Februari"; break;
+            case 2: newBulan = "Maret"; break;
+            case 3: newBulan = "April"; break;
+            case 4: newBulan = "Mei"; break;
+            case 5: newBulan = "Juni"; break;
+            case 6: newBulan = "Juli"; break;
+            case 7: newBulan = "Agustus"; break;
+            case 8: newBulan = "September"; break;
+            case 9: newBulan = "Oktober"; break;
+            case 10: newBulan = "November"; break;
+            case 11: newBulan = "Desember"; break;
         }
-        var tampilTanggal = hari + ", " + tanggal + " " + bulan + " " + tahun;
+        var tampilTanggal = hari + ", " + tanggal + " " + newBulan + " " + tahun;
         document.getElementById("date-today").innerHTML = tampilTanggal;
 
-        var modal = document.getElementById("myModal");
-        var btn = document.getElementById("city");
-        var span = document.getElementsByClassName("close")[0];
-        btn.onclick = function () {
-            modal.style.display = "block";
+        var modalCity = document.getElementById("modal-city");
+        var btnCity = document.getElementById("city");
+        var spanCity = document.getElementById("close-city");
+
+        btnCity.onclick = function () {
+            fetch("https://api.myquran.com/v1/sholat/kota/semua")
+                .then(response => response.json())
+                .then(data => {
+                    var item = "";
+                    for (var i = 0; i < data.length; i++) {
+                        if (data[i].lokasi != null) {
+                            item += `<option value="` + data[i].id + `">` + data[i].lokasi + `</option>`;
+                        }
+                    }
+                    cityForm.innerHTML = item;
+                }).catch(e => {
+                    console.log("Error Fetch All City for Adzan: " + e);
+                })
+            modalCity.style.display = "block";
         }
-        span.onclick = function () {
-            modal.style.display = "none";
+        spanCity.onclick = function () {
+            modalCity.style.display = "none";
         }
         window.onclick = function (event) {
-            if (event.target == modal) {
-                modal.style.display = "none";
+            if (event.target == modalCity) {
+                modalCity.style.display = "none";
             }
         }
 
@@ -130,11 +167,11 @@
             .then(data => {
                 var item = "";
                 for (var i = 0; i < data.length; i++) {
-                    item += `<div class="quran-surah">
+                    item += `<a class="quran-surah" data-id="` + data[i].nomor + `">
                     <h4 class="surah-number">`+ data[i].nomor + `</h4>
                     <h5 class="surah-name">`+ data[i].nama + `</h5>
                     <h5 class="surah-define">`+ data[i].arti + `</h5>
-                </div>`;
+                </a>`;
                 }
                 document.getElementById("quran-list").innerHTML = item;
             }).catch(e => {
