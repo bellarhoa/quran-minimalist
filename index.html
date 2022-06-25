@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Adzan & Al-Qur'an</title>
-    <link rel="stylesheet" href="stylesheet.css">
+    <link rel="stylesheet" href="/JavascriptAPI/stylesheet.css">
     <link
         href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
         rel="stylesheet">
@@ -45,6 +45,7 @@
             </div>
         </div>
     </div>
+
     <div class="quran-wrapper">
         <div class="container">
             <h2>Al Qur'an</h2>
@@ -65,6 +66,19 @@
     <div id="modal-surah" class="modal">
         <div class="modal-content">
             <span class="close" id="close-surah">&times;</span>
+            <div class="surah" id="surah">
+                <!-- <h2 class="text-center">Al-Fatihah</h2>
+                <h4 class="text-center">7 Ayat</h4>
+                <br>
+                <div class="ayat d-flex">
+                    <h4 class="ayat-number">1</h4>
+                    <div class="d-block">
+                        <h5 class="ayat-ar">Ayat Arab</h5>
+                        <h5 class="ayat-tr text-weight-normal">Ayat baca</h5>
+                        <h5 class="ayat-id">Pengertian</h5>
+                    </div>
+                </div> -->
+            </div>
         </div>
     </div>
 
@@ -162,18 +176,59 @@
             }
         }
 
+        var modal = document.getElementById("modal-surah");
+        var span = document.getElementById("close-surah");
+
+        span.onclick = function () {
+            modal.style.display = "none";
+        }
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
         fetch("https://al-quran-8d642.firebaseio.com/data.json?print=pretty")
             .then(response => response.json())
             .then(data => {
                 var item = "";
                 for (var i = 0; i < data.length; i++) {
-                    item += `<a class="quran-surah" data-id="` + data[i].nomor + `">
+                    item += `<div class="quran-surah" data-id="` + data[i].nomor + `">
                     <h4 class="surah-number">`+ data[i].nomor + `</h4>
                     <h5 class="surah-name">`+ data[i].nama + `</h5>
                     <h5 class="surah-define">`+ data[i].arti + `</h5>
-                </a>`;
+                </div>`;
                 }
                 document.getElementById("quran-list").innerHTML = item;
+                var cards = document.querySelectorAll(".quran-surah");
+                for (var j = 0; j < cards.length; j++) {
+                    var card = cards[j];
+                    card.onclick = function () {
+                        fetch("https://al-quran-8d642.firebaseio.com/surat/" + this.getAttribute("data-id") + ".json?print=pretty")
+                            .then(response => response.json())
+                            .then(ayat => {
+                                var element = "";
+                                element = `<h2 class="text-center">` + data[this.getAttribute("data-id") - 1].nama + `</h2>
+                <h4 class="text-center">`+ data[this.getAttribute("data-id") - 1].ayat + ` Ayat</h4>
+                <br>`
+                                for (var k = 0; k < ayat.length; k++) {
+                                    element +=
+                                        `<div class="ayat d-flex">
+                    <h4 class="ayat-number">`+ ayat[k].nomor + `</h4>
+                    <div class="d-block">
+                        <h1 class="ayat-ar">`+ ayat[k].ar + `</h1>
+                        <h5 class="ayat-tr text-weight-normal">`+ ayat[k].tr + `</h5>
+                        <h5 class="ayat-id">`+ ayat[k].id + `</h5>
+                    </div>
+                </div>`;
+                                }
+                                document.getElementById("surah").innerHTML = element;
+                            }).catch(e => {
+                                console.log("Error Fetch Ayat: " + e);
+                            })
+                        modal.style.display = "block";
+                    };
+                }
             }).catch(e => {
                 console.log("Error Fetch Quran: " + e);
             })

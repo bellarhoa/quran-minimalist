@@ -28,6 +28,22 @@ div{
     display: block;
 }
 
+.d-flex{
+    display: flex;
+}
+
+.d-block{
+    display: block;
+}
+
+.text-center{
+    text-align: center !important;
+}
+
+.text-weight-normal{
+    font-weight: 400;
+}
+
 .date-wrapper{
     text-align: center;
     padding: 2.5vw;
@@ -131,6 +147,27 @@ div{
 }
 
 .surah-define{
+    color: #ADB3BC;
+}
+
+.ayat{
+    background-color: white;
+    padding: 2vw;
+    border-radius: 10px;
+    box-shadow: 0 1rem 3rem rgba(208, 216, 222, 0.7);
+}
+
+.ayat-number{
+    background-color: #E9F9FF;
+    width: 3vw;
+    height: 3vw;
+    border-radius: 50%;
+    line-height: 3vw;
+    text-align: center;
+    margin-right: 1vw;
+}
+
+.ayat-id{
     color: #ADB3BC;
 }
 
